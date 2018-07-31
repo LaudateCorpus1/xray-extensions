@@ -35,15 +35,15 @@ include shader_defines.asm		; установка дефайнов для шейдеров
 include	register_sampler_macro.asm	; макросы регистрации семплеров для шейдера
 include	register_sampler_combine.asm	; регистрация семплеров для CBlender_combine
 include	register_sampler_particle.asm	; регистрация семплеров для CBlender_Particle
+include	new_blenders.asm
+include new_rendertargets.asm
 include noise_texture.asm		; шумовая текстура высокого разрешения
 include mip_bias_fix.asm
-include detail_bump.asm
+;include detail_bump.asm
+;include jitter.asm
+include render_methods.asm
+include render_dips.asm
 include actor_shadow_fix.asm
-include smap_size_macro.asm
-include new_smap_sizes.asm
-include detail_blink_fix.asm
-include sun_near_fix.asm
-include hemi_update_fix.asm
 
 _code ENDS
 

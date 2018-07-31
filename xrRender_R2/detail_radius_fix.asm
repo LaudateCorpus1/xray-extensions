@@ -7,6 +7,10 @@ calculate_stuff:
 	push	edi
 	push	esi
 	mov		eax, det_rad_value
+	sub		eax, 1
+	shr		eax, 2
+	shl		eax, 2
+	add		eax, 1
 ;rad
 	mov		rad, eax		; eax = 49, ebx = ???, edi = ???, esi = ???, 
 	mov 	ebx, eax		; eax = 49, ebx = 49, edi = ???, esi = ???, 

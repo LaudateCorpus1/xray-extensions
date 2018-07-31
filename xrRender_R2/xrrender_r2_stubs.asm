@@ -65,13 +65,6 @@ back_from_CLight_Compute_XFORM_and_VIS__compute_xf_spot_fix:
 ;.text:10033874                 movss   dword ptr [edi+1E8h], xmm1
 
 
-;.text:100337C5                 addss   xmm0, ds:__real@3d7a35dd
-org 100337C0h - shift
-;	addss   xmm0, dword ptr [tan_shift]
-	jmp light_blink_fix
-org 100337CDh - shift
-back_from_light_blink_fix:
-	
 ;light::export
 ;.text:1002FD41                 mov     esi, eax
 org 1002FD43h - shift
@@ -160,6 +153,10 @@ org 100693F0h - shift
 resptr_base_CTexture____dec dd ?
 org 100693ECh - shift
 CTexture__surface_set dd ?
+org 10069358h - shift
+R_constants__flush_cache dd ?
+org 10069408h - shift
+R_constant_table__get_char_const dd ?
 
 org 100692E0h - shift
 RCache dd ?
@@ -183,7 +180,6 @@ dword_1006E644 dd ?
 ;sub_10018F40:
 org 1001A6D0h - shift
 sub_1001A6D0:
-
 
 
 
@@ -531,25 +527,9 @@ org 10023E2Ah - shift
 org 10023E31h - shift
 back_to_cache_task_1:
 
-; фикс мигания травы
-
-org 100229DCh - shift
-	jmp	detail_blink_fix
-org 100229F6h - shift
-back_from_detail_blink_fix:
-org 1007A988h - shift
-RImplementation dd ?
-
 ;===========================================
 ; ПЛОТНОСТЬ ТРАВЫ.
 ;===========================================
-
-CCC_Float       struct ; (sizeof=0x18, standard type)
-	baseclass_0     dd ?
-	value           dd ?                    ; offset
-	min             dd ?
-	max             dd ?
-CCC_Float       ends
 
 org 10001752h - shift
 	jmp det_density
@@ -557,7 +537,7 @@ org 10001761h - shift
 back_to_det_density:
 
 org 10089C28h - shift
-xCCC_Float_42 CCC_Float <?>
+xCCC_Float_42 dd ?
 
 ;===========================================
 ; КОНСОЛЬНАЯ КОМАНДА
@@ -596,11 +576,10 @@ org 10069294h - shift
 CConsole__AddCommand dd ?
 
 ;===========================================
-; ОБРАБОТЧИК КОНСОЛЬНОЙ КОМАНДЫ.
+; ОБРАБОТЧИК 
 ; вызывается из CRender::level_Load
 ; врезка тут:
 ; .text:10007607                 push    0D0BB8h
-; как раз пять байт
 ;===========================================
 
 org 10007607h - shift
@@ -668,9 +647,7 @@ smooth_circle	REAL4 ?
 
 off dd offset det_dens_max_offset
 
-;===========================================
 ; тени травы
-;===========================================
 org 100690ECh - shift
 memmove_s dword ?
 org 1000D1C9h - shift
@@ -685,15 +662,11 @@ org 10027997h - shift
 org 100279C6h - shift
 back_to_sun_details_1_fix:
 
-;===========================================
 ; rt_position fix
-;===========================================
 org 1006679Ch - shift
 	jmp	rt_position_clear
 
-;===========================================
 ; bloodmarks
-;===========================================
 org 1000D0B6h - shift
 	jmp	bloodmarks
 org 1000D0BCh - shift
@@ -702,9 +675,8 @@ back_to_bloodmarks:
 org 10079480h - shift
 g_r dd 1
 
-;===========================================
+
 ; дефайны шейдеров
-;===========================================
 org 100059A2h - shift
 	nop
 	nop
@@ -741,17 +713,13 @@ shared_str__shared_str:
 org 1003CE80h - shift
 uber_deffer:
 
-;===========================================
 ; регистрация семплеров в combine-шейдере
-;===========================================
 org 1003ADEEh - shift
 	jmp combine_2_sampler_register
 org 1003ADF4h - shift
 back_to_combine_2_sampler_register:
 
-;===========================================
 ; добавление собственного блендера в CRenderTarget
-;===========================================
 org 10069698h - shift
 _Memory dd ?
 org 1006969Ch - shift
@@ -784,30 +752,43 @@ org 10067E90h - shift
 _D3DXCreateTexture:
 org 100566B0h - shift
 generate_jitter:
+org 100693CCh - shift
+resptrcode_crt__create dd ?
 
+; новые блендеры и текстуры
 ; увеличим место под экземпляр класса CRenderTarget:
 ;0x180 - b_ikvision		- блендер класса CBlender_ikvision
 ;0x184 - s_ikvision		- шейдер ик-видения
 ;0x188 - t_noise_hd_surf - указатель на объект типа  IDirect3DTexture9 - DirectX поверхность для шума высокого разрешения
-;0x188 - t_noise_hd - объект типа resptr_core<CTexture,resptrcode_texture> - текстура для шума высокого разрешения
+;0x18С - t_noise_hd - объект типа resptr_core<CTexture,resptrcode_texture> - текстура для шума высокого разрешения
+;0x190 - b_sunshafts		- блендер класса CBlender_sunshafts
+;0x194 - s_sunshafts		- шейдер саншафтов
+;0x198 - t_sunshafts_mask 		- объект типа resptr_core<CTexture,resptrcode_texture> - текстура
+;0x19C - t_sunshafts 		- объект типа resptr_core<CTexture,resptrcode_texture> - текстура
 	; увеличение места под экземпляр класса CRenderTarget в CRender::create()
 org 10004218h - shift
-push 190h		; 180h по умолчанию
+push 1A0h		; 180h по умолчанию
 	; увеличение места под экземпляр класса CRenderTarget в CRender::reset_end()
 org 10004773h - shift
-push 190h		; 180h по умолчанию
+push 1A0h		; 180h по умолчанию
+	; инициализируем блендеры и создаем шейдеры на его основе
+org 100578C7h - shift
+	jmp	CRenderTarget_constructor
+org 100578CFh - shift
+back_to_CRenderTarget_constructor:
+	; добавляем переключение между шейдерами при рендере
+org 1006468Fh - shift
+	jmp	CRenderTarget_phase_combine_add
+org 10064694h - shift
+back_to_CRenderTarget_phase_combine_add:
 
-;===========================================
-; добавляем нойз-текстуру хорошего разрешения
-;===========================================
+	; добавляем текстуры
 org 10057871h - shift
 	jmp	noise_texture
 org 10057877h - shift
 back_to_noise_texture:
 
-;===========================================
 ; правильное положение солнца
-;===========================================
 org 1006E564h - shift
 __real@bf400000 dd 0.0
 org 10030515h - shift
@@ -844,12 +825,15 @@ back_to_particle_sampler_register:
 ;===========================================
 ; детальный бамп
 ;===========================================
-org 100690FCh - shift
-strcat_s dd ?
-org 1003D2B1h - shift
-	jmp add_detail_bump_sampler
-org 1003D2E7h - shift
-back_to_add_detail_bump_sampler:
+;org 100690FCh - shift
+;strcat_s dd ?
+;org 1003D2B1h - shift
+;	jmp add_detail_bump_sampler
+;org 1003D2E7h - shift
+;back_to_add_detail_bump_sampler:
+
+;org 1003BE03h - shift
+;	jmp add_jitter
 
 ;===========================================
 ; тень от ГГ на R2
@@ -862,68 +846,19 @@ org 1000BA23h - shift
 back_to_actor_shadow_fix:	
 
 ;===========================================
-; Дополнительные разрешения карты теней
+; новые рендер-проходы
 ;===========================================
-org 10003F43h - shift
-	jmp	new_smap_sizes
-org 10003F48h - shift
-back_from_new_smap_sizes:
-org 1006964Ch - shift
-Core dd ?
-
-;===========================================
-; Расширенная регулировка r2_sun_near
-;===========================================
-org 100024DAh - shift
-	jmp	sun_near_fix_label
-org 100024E1h - shift
-back_from_sun_near_fix_label:
-
-;===========================================
-; Фикс отрисовки самосветящейся геометрии
-;===========================================
-org 1003BBF8h - shift
-	db 2
-org 1003BBFCh - shift
-	db 1
-org 1003BCB8h - shift
-	db 2
-org 1003BCBCh - shift
-	db 1
-	
-;===========================================
-; r2_sun_near_border [0,5..1,5]
-; исправляем глюк тени на краю экрана.
-;===========================================
-org 10089888h - shift
-unk_10089888:
-
-org 10002523h - shift	; 2 bytes
-	nop
-	nop
-
-org 1000252Fh - shift	; 7 bytes
-	nop
-	nop
-	jmp		r2_sun_near_border_EXT_CHUNK
-	
-org 10002544h - shift
-r2_sun_near_border_EXT_CHUNK_OUT:
-
-;===========================================
-; увеличение скорости апдейта hemi длЯ динамической геометрии
-;===========================================
-org 1000BA86h - shift
-	jmp hemi_update_fix
-org 1000BAB6h - shift
-back_from_hemi_update_fix:
-
-org 10034420h - shift
-CROS_impl__update:
-org 10069370h - shift
-IRenderable__renderable_ROS dd ?
-
-org 100350ADh - shift
-	jmp hemi_smooth_fix
-org 100350B5h - shift
-back_from_hemi_smooth_fix:
+org 10069348h - shift
+_VertexStream__Lock dd ?
+org 10069354h - shift
+_VertexStream__Unlock dd ?
+org 100692F0h - shift
+resptr_base___dec dd ?
+org 10060F90h - shift
+CRenderTarget__phase_bloom:
+org 100693C4h - shift
+CBackend__set_Element dd ?
+org 100640BDh - shift
+	jmp new_render_dips
+org 100640C2h - shift
+back_to_new_render_dips:
