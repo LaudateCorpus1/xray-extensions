@@ -14,7 +14,6 @@ light__light_fix proc
 	jmp back_from_light__light_fix
 light__light_fix endp
 
-
 light__export_fix proc
 	; делаем вырезанное
 	call    light__light
@@ -41,11 +40,24 @@ st0_storage                = dword ptr -16
 	mov     ebp, esp
 	sub     esp, 16
 	push    eax
-	;
+	; проверяем, не выходит ли радиус за границы диапазона
+	movss	xmm0, dword ptr [edi + 270h]
+	comiss	xmm0, dword ptr [flt_0_01]
+	jb		short set_default
+
 	mov eax, dword ptr [edi + 270h]
 	mov [ebp+SMAP_near_plane], eax
 	mov eax, dword ptr [edi + 274h]
 	mov [ebp+SMAP_near_plane_neg], eax
+	jmp		short go_next
+	
+set_default:
+	mov		eax, dword ptr [flt_0_01]
+	mov		[ebp+SMAP_near_plane], eax
+	mov		eax, dword ptr [flt_0_01_neg]
+	mov		[ebp+SMAP_near_plane_neg], eax
+	
+go_next:
 	; делаем вырезанное, 
 	movss   dword ptr [edi+1DCh], xmm2
 	movaps  xmm0, xmm1
@@ -73,6 +85,27 @@ st0_storage                = dword ptr -16
 	jmp back_from_CLight_Compute_XFORM_and_VIS__compute_xf_spot_fix
 CLight_Compute_XFORM_and_VIS__compute_xf_spot_fix endp
 
-flt_0_001 dd 0.01
+light_blink_fix proc
+	push	ecx
+	movss   xmm0, dword ptr [edi+68h]
+	mov		ecx, [edi+3Ch]		;light::flags
+	and		cl, 0Fh
+	test	cl, 1				
+	pop		ecx
+	jz		short not_point
+	addss   xmm0, dword ptr [tan_shift_point]
+	jmp		short l_exit
+	
+not_point:
+	addss   xmm0, dword ptr [tan_shift_spot]
+	
+l_exit:
+	jmp back_from_light_blink_fix
+light_blink_fix endp
+
+flt_0_01 dd 0.01
+flt_0_01_neg dd -0.01
+tan_shift_point dd 0.2007
+tan_shift_spot dd 0.0611
 flt_default_SMAP_near_plane dd 0.1
 flt_default_SMAP_near_plane_neg dd -0.1

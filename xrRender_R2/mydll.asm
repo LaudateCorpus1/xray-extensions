@@ -44,6 +44,11 @@ include mip_bias_fix.asm
 include render_methods.asm
 include render_dips.asm
 include actor_shadow_fix.asm
+include smap_size_macro.asm
+include new_smap_sizes.asm
+include detail_blink_fix.asm
+include sun_near_fix.asm
+include hemi_update_fix.asm
 
 _code ENDS
 

@@ -527,6 +527,17 @@ org 10023E2Ah - shift
 org 10023E31h - shift
 back_to_cache_task_1:
 
+
+;===========================================
+; фикс мигания травы
+;===========================================
+org 100229DCh - shift
+	jmp	detail_blink_fix
+org 100229F6h - shift
+back_from_detail_blink_fix:
+org 1007A988h - shift
+RImplementation dd ?
+
 ;===========================================
 ; ПЛОТНОСТЬ ТРАВЫ.
 ;===========================================
@@ -862,3 +873,77 @@ org 100640BDh - shift
 	jmp new_render_dips
 org 100640C2h - shift
 back_to_new_render_dips:
+
+;===========================================
+; Дополнительные разрешения карты теней
+;===========================================
+org 10003F43h - shift
+	jmp	new_smap_sizes
+org 10003F48h - shift
+back_from_new_smap_sizes:
+org 1006964Ch - shift
+Core dd ?
+
+;===========================================
+; Расширенная регулировка r2_sun_near
+;===========================================
+org 100024DAh - shift
+	jmp	sun_near_fix_label
+org 100024E1h - shift
+back_from_sun_near_fix_label:
+
+; фикс мерцаниЯ ламп
+org 100337C0h - shift
+;	addss   xmm0, dword ptr [tan_shift]
+	jmp light_blink_fix
+org 100337CDh - shift
+back_from_light_blink_fix:
+
+;===========================================
+; Фикс отрисовки самосветящейся геометрии
+;===========================================
+org 1003BBF8h - shift
+	db 2
+org 1003BBFCh - shift
+	db 1
+org 1003BCB8h - shift
+	db 2
+org 1003BCBCh - shift
+	db 1
+
+;===========================================
+; r2_sun_near_border [0,5..1,5]
+; исправляем глюк тени на краю экрана.
+;===========================================
+org 10089888h - shift
+unk_10089888:
+
+org 10002523h - shift	; 2 bytes
+	nop
+	nop
+
+org 1000252Fh - shift	; 7 bytes
+	nop
+	nop
+	jmp		r2_sun_near_border_EXT_CHUNK
+	
+org 10002544h - shift
+r2_sun_near_border_EXT_CHUNK_OUT:
+
+;===========================================
+; увеличение скорости апдейта hemi длЯ динамической геометрии
+;===========================================
+org 1000BA86h - shift
+	jmp hemi_update_fix
+org 1000BAB6h - shift
+back_from_hemi_update_fix:
+
+org 10034420h - shift
+CROS_impl__update:
+org 10069370h - shift
+IRenderable__renderable_ROS dd ?
+
+org 100350ADh - shift
+	jmp hemi_smooth_fix
+org 100350B5h - shift
+back_from_hemi_smooth_fix:

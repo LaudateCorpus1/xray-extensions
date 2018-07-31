@@ -66,7 +66,7 @@ REGISTER_SAMPLER_CLF "$user$generic0", "s_image"
 	
 _1:
 ; E[1]
-	push    offset aPS_1 ; "ogse_sunshafts_gen_main"
+	push    offset aPS_2 ; "ogse_sunshafts_gen_main"
 	push    offset aVS ; "null"
 	mov     ecx, esi
 	call    ds:CBlender_Compile__r_Pass
@@ -99,7 +99,7 @@ exit:
 CBlender_sunshafts__Compile endp
 
 aComment db "INTERNAL:sunshafts", 0
-aPS_0 db "ogse_sunshafts_mask_gen", 0
-aPS_1 db "ogse_sunshafts_gen_main", 0
-aPS_2 db "ogse_sunshafts_gen", 0
+aPS_0 db "sunshafts_mask", 0
+;aPS_1 db "ogse_sunshafts_gen_main", 0
+aPS_2 db "sunshafts", 0
 aVS db "null", 0
